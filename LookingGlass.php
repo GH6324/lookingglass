@@ -186,11 +186,17 @@ class LookingGlass
 
         if (filter_var('https://'.$host, FILTER_VALIDATE_URL)) {
             if ($host = parse_url('https://'.$host, PHP_URL_HOST)) {
-                if ($type === self::IPV4 && isset(dns_get_record($host, DNS_A)[0]['ip'])) {
-                    return $host;
+                if ($type === self::IPV4) {
+                    $resolved = dns_get_record($host, DNS_A)[0]['ip'] ?? '';
+                    if ($resolved && self::isValidIpv4($resolved)) {
+                        return $resolved;
+                    }
                 }
-                if ($type === self::IPV6 && isset(dns_get_record($host, DNS_AAAA)[0]['ipv6'])) {
-                    return $host;
+                if ($type === self::IPV6) {
+                    $resolved = dns_get_record($host, DNS_AAAA)[0]['ipv6'] ?? '';
+                    if ($resolved && self::isValidIpv6($resolved)) {
+                        return $resolved;
+                    }
                 }
 
                 return '';
