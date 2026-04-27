@@ -42,6 +42,12 @@ services:
       # ENABLE_CUSTOM_BLOCK: 'true'
       # Uncomment if you require visitors to accept the Terms of Use; the value should be a link to the terms.
       # LG_TERMS: http://localhost/
+      # Comma-separated list of enabled methods (default: all methods enabled).
+      # METHODS: ping,ping6,mtr,mtr6,traceroute,traceroute6
+      # Comma-separated "Label|URL" pairs for other looking glass locations (default: none).
+      # LOCATIONS: "Amsterdam|https://ams.lg.example.com,Frankfurt|https://fra.lg.example.com"
+      # Comma-separated "Label|URL" pairs for speedtest files (default: none).
+      # SPEEDTEST_FILES: "100MB|https://example.com/100mb.bin,1GB|https://example.com/1gb.bin"
 
   # iperf3:
   #   image: networkstatic/iperf3:latest

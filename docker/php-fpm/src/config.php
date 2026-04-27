@@ -52,22 +52,47 @@ define('LG_IPV4', getenv('IPV4_ADDRESS'));
 // Define an IPv6 for testing;
 define('LG_IPV6', getenv('IPV6_ADDRESS'));
 
-// Define the methods that can be used by visitors to test it out;
-const LG_METHODS = [
+// Parse a comma-separated env var into an indexed array; returns $default when the var is unset/empty.
+// Example env value: "ping,mtr,traceroute"
+function parseEnvList(string $envVar, array $default = []): array {
+    $raw = getenv($envVar);
+    if ($raw === false || $raw === '') {
+        return $default;
+    }
+    return array_values(array_filter(array_map('trim', explode(',', $raw))));
+}
+
+// Parse a comma-separated "label|url" env var into an associative array; returns $default when unset/empty.
+// Example env value: "Amsterdam|https://ams.lg.example.com,Frankfurt|https://fra.lg.example.com"
+function parseEnvMap(string $envVar, array $default = []): array {
+    $raw = getenv($envVar);
+    if ($raw === false || $raw === '') {
+        return $default;
+    }
+    $result = [];
+    foreach (explode(',', $raw) as $item) {
+        $parts = explode('|', $item, 2);
+        if (count($parts) === 2) {
+            $result[trim($parts[0])] = trim($parts[1]);
+        }
+    }
+    return $result ?: $default;
+}
+
+// Define the methods that can be used by visitors to test it out.
+// Set METHODS env var to a comma-separated list, e.g.: "ping,ping6,mtr,mtr6,traceroute,traceroute6"
+define('LG_METHODS', parseEnvList('METHODS', [
     LookingGlass::METHOD_PING,
     LookingGlass::METHOD_PING6,
     LookingGlass::METHOD_MTR,
     LookingGlass::METHOD_MTR6,
     LookingGlass::METHOD_TRACEROUTE,
     LookingGlass::METHOD_TRACEROUTE6,
-];
+]));
 
-// Define other looking glasses, this is useful if you have multiple networks and looking glasses;
-const LG_LOCATIONS = [
-    'Location A' => 'https://github.com/hybula/lookingglass/',
-    'Location B' => 'https://github.com/hybula/lookingglass/',
-    'Location C' => 'https://github.com/hybula/lookingglass/',
-];
+// Define other looking glasses, this is useful if you have multiple networks and looking glasses.
+// Set LOCATIONS env var to comma-separated "Label|URL" pairs, e.g.: "Amsterdam|https://ams.lg.example.com,Frankfurt|https://fra.lg.example.com"
+define('LG_LOCATIONS', parseEnvMap('LOCATIONS', []));
 
 // Enable the iPerf info inside the speedtest block, set to false to disable;
 const LG_SPEEDTEST_IPERF = true;
@@ -79,12 +104,9 @@ const LG_SPEEDTEST_CMD_INCOMING = 'iperf3 -4 -c hostname -p 5201 -P 4';
 const LG_SPEEDTEST_LABEL_OUTGOING = 'iPerf3 Outgoing';
 // Define the command to use to test outgoing speed using iPerf, preferable iPerf3;
 const LG_SPEEDTEST_CMD_OUTGOING = 'iperf3 -4 -c hostname -p 5201 -P 4 -R';
-// Define speedtest files with URLs to the actual files;
-const LG_SPEEDTEST_FILES = [
-    '100M' => 'https://github.com/hybula/lookingglass/',
-    '1G' => 'https://github.com/hybula/lookingglass/',
-    '10G' => 'https://github.com/hybula/lookingglass/'
-];
+// Define speedtest files with URLs to the actual files.
+// Set SPEEDTEST_FILES env var to comma-separated "Label|URL" pairs, e.g.: "100MB|https://example.com/100mb.bin,1GB|https://example.com/1gb.bin"
+define('LG_SPEEDTEST_FILES', parseEnvMap('SPEEDTEST_FILES', []));
 
 // Define if you require visitors to agree with the Terms of Use. The value should be a link to the terms, or false to disable it completely.
 define('LG_TERMS', getenv('LG_TERMS') ?: false);
