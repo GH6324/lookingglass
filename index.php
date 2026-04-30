@@ -30,13 +30,13 @@ if (!empty($_POST)) {
         exitErrorMessage('Unsupported backend method.');
     }
 
+    $targetHost = htmlspecialchars($_POST['targetHost'], ENT_QUOTES, 'UTF-8');
     $_SESSION[LookingGlass::SESSION_TARGET_METHOD] = $_POST['backendMethod'];
-    $_SESSION[LookingGlass::SESSION_TARGET_HOST]   = $_POST['targetHost'];
+    $_SESSION[LookingGlass::SESSION_TARGET_HOST]   = $targetHost;
     if (!isset($_POST['checkTerms']) && LG_TERMS) {
         exitErrorMessage('You must agree with the Terms of Service.');
     }
 
-    $targetHost = $_POST['targetHost'];
     if (in_array($_POST['backendMethod'], ['ping', 'mtr', 'traceroute'])) {
         if (!LookingGlass::isValidIpv4($_POST['targetHost']) &&
             !$targetHost = LookingGlass::isValidHost($_POST['targetHost'], LookingGlass::IPV4)
@@ -53,7 +53,7 @@ if (!empty($_POST)) {
         }
     }
 
-    $_SESSION[LookingGlass::SESSION_TARGET_HOST]  = htmlspecialchars($targetHost, ENT_QUOTES, 'UTF-8');
+    $_SESSION[LookingGlass::SESSION_TARGET_HOST]  = $targetHost;
     $_SESSION[LookingGlass::SESSION_TOS_CHECKED]  = true;
     $_SESSION[LookingGlass::SESSION_CALL_BACKEND] = true;
     exitNormal();
