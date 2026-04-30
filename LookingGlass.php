@@ -139,7 +139,11 @@ class LookingGlass
     public static function startSession(): void
     {
         session_name('HYLOOKINGLASS');
-        @session_start() or die('Could not start session!');
+        @session_start([
+            'cookie_httponly' => true,
+            'cookie_secure'   => true,
+            'cookie_samesite' => 'Strict',
+        ]) or die('Could not start session!');
     }
 
     /**
@@ -164,10 +168,33 @@ class LookingGlass
      */
     public static function isValidIpv6(string $ip): bool
     {
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-            return true;
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return false;
         }
-        return false;
+
+        $binary = inet_pton($ip);
+        if ($binary === false) {
+            return false;
+        }
+
+        $hex = bin2hex($binary);
+
+        // Block 6to4 (2002::/16) — embeds arbitrary IPv4 in bytes 3-6
+        if (str_starts_with($hex, '2002')) {
+            return false;
+        }
+
+        // Block Teredo (2001:0000::/32) — embeds arbitrary IPv4 in bytes 13-16
+        if (str_starts_with($hex, '20010000')) {
+            return false;
+        }
+
+        // Block documentation (2001:db8::/32) — not routable
+        if (str_starts_with($hex, '20010db8')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

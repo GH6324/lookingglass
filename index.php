@@ -53,7 +53,7 @@ if (!empty($_POST)) {
         }
     }
 
-    $_SESSION[LookingGlass::SESSION_TARGET_HOST]  = $targetHost;
+    $_SESSION[LookingGlass::SESSION_TARGET_HOST]  = htmlspecialchars($targetHost, ENT_QUOTES, 'UTF-8');
     $_SESSION[LookingGlass::SESSION_TOS_CHECKED]  = true;
     $_SESSION[LookingGlass::SESSION_CALL_BACKEND] = true;
     exitNormal();
